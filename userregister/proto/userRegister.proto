@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package go.micro.api.register;
+
+service Register {
+	rpc RegisterUser(Request) returns (Response) {}
+}
+
+message Request {
+    string mobileNum = 1;
+	string name = 2;
+	string password = 3;
+}
+
+message Response {
+	string msg = 1;
+}
