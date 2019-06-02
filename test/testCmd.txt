@@ -1,6 +1,7 @@
 vrOffice对外暴漏接口测试
 
 1 测试注册
+curl -H 'Content-Type: application/json' -d '{"name": "Asim"}' http://47.75.98.179:8080/register/RegisterUser
 
 2 测试登陆
 

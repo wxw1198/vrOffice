@@ -1,0 +1,36 @@
+ git config --global user.email "wxw1198@sina.com"
+ 
+  git config --global user.name "wxw1198"
+  
+  
+  
+ ./etcd  --initial-advertise-peer-urls http://0.0.0.0:8081 --listen-peer-urls http://0.0.0.0:8081 --listen-client-urls http://0.0.0.0:55556 --advertise-client-urls http://0.0.0.0:55556 
+ 
+ 
+ 
+ ./etcd --name infra0 --initial-advertise-peer-urls http://10.0.1.111:2380 \
+  --listen-peer-urls http://10.0.1.111:2380 \
+  --listen-client-urls http://10.0.1.111:2379,http://127.0.0.1:2379 \
+  --advertise-client-urls http://10.0.1.111:2379 \
+  --initial-cluster-token etcd-cluster-1 \
+  --initial-cluster
+
+
+ --registry value                Registry for discovery. consul, mdns [$MICRO_REGISTRY]
+   --registry_address value        Comma-separated list of registry addresses [$MICRO_REGISTRY_ADDRESS]
+   
+  ./micro --registry=etcdv3 --registry_address=47.88.230.122:55556 api
+  
+  
+  //编译micro,添加etcdv3
+  _ "github.com/micro/go-plugins/registry/etcdv3"
+
+./main --registry=etcdv3 --registry_address=127.0.0.1:2379
+
+
+在micro的main.go页加上etcdv3，然后编译安装。
+
+ ./micro --registry=etcdv3 --registry_address=47.88.230.122:55556 --api_address=0.0.0.0:8081 api
+
+
+
