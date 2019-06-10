@@ -1,14 +1,14 @@
 package main
 
 import (
+	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/registry"
+	"github.com/micro/go-micro/server"
 	"github.com/micro/go-plugins/registry/etcdv3"
 	"log"
 
 	//proto "github.com/micro/examples/greeter/api/rpc/proto/hello"
 	proto "github.com/wxw1198/vrOffice/userregister/proto"
-	//hello "github.com/micro/examples/greeter/srv/proto/hello"
-	"github.com/micro/go-micro"
 
 	"context"
 )
@@ -43,13 +43,22 @@ func main() {
 			"47.88.230.122:55556",
 		}
 	})
+	//service := micro.NewService(
+	//	micro.Registry(reg),
+	//	micro.Name("go.micro.api.register"),
+	//)
+
 	service := micro.NewService(
-		micro.Registry(reg),
-		micro.Name("go.micro.api.register"),
-	)
+			micro.Registry(reg),
+			micro.Name("go.micro.api.register"),
+			micro.Address("0.0.0.0:8081"),
+			//micro.Address("39.98.39.224:8081"),
+		)
 
 	// Init to parse flags
 	service.Init()
+
+	service.Server().Init(server.Advertise("39.98.39.224:8081"))
 
 	proto.RegisterRegisterHandler(service.Server(), &Register{
 		// Create Service Client
