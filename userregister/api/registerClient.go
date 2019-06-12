@@ -7,65 +7,42 @@ import (
 	"github.com/micro/go-plugins/registry/etcdv3"
 	"log"
 
-	//proto "github.com/micro/examples/greeter/api/rpc/proto/hello"
+	"github.com/wxw1198/vrOffice/userregister/api/handler"
+	"github.com/wxw1198/vrOffice/userregister/api/config"
 	proto "github.com/wxw1198/vrOffice/userregister/proto"
-
-	"context"
 )
 
-type Register struct {
-	Client   proto.RegisterService //hello.SayService
-}
-
-func (g *Register) RegisterUser(ctx context.Context, req *proto.Request, rsp *proto.Response) error {
-	log.Print("Received Greeter.Hello API request", req.Name)
-
-	// make the request
-	//response, err := g.Client.Hello(ctx, &hello.Request{Name: req.Name})
-	//if err != nil {
-	//	return err
-	//}
-
-	// 1 检查是否已经注册
-	// 2 检查注册参数
-	//3 开协程，启动信息入库
-	// 4 等待注册结束
-
-	// set api response
-	rsp.Msg = "register success"
-	return nil
-}
-
 func main() {
-	// Create service
-	reg := etcdv3.NewRegistry(func(op *registry.Options){
+	//获取相关配置
+	if !config.ParseConfig(&config.DefaultConfig) {
+		log.Fatal("parse config err")
+		return
+	}
+
+	//用于服务发现的地址
+	reg := etcdv3.NewRegistry(func(op *registry.Options) {
 		op.Addrs = []string{
-			"47.88.230.122:55556",
+			config.DefaultConfig.Etcdv3,
 		}
 	})
-	//service := micro.NewService(
-	//	micro.Registry(reg),
-	//	micro.Name("go.micro.api.register"),
-	//)
 
 	service := micro.NewService(
-			micro.Registry(reg),
-			micro.Name("go.micro.api.register"),
-			micro.Address("0.0.0.0:8081"),
-			//micro.Address("39.98.39.224:8081"),
-		)
+		micro.Registry(reg),
+		micro.Name(config.DefaultConfig.MicroName),
+		micro.Address(config.DefaultConfig.ListenLocalAddr),
+	)
 
 	// Init to parse flags
 	service.Init()
 
-	service.Server().Init(server.Advertise("39.98.39.224:8081"))
+	//设置服务器的公网地址
+	service.Server().Init(server.Advertise(config.DefaultConfig.AdvertiseAddr))
 
-	proto.RegisterRegisterHandler(service.Server(), &Register{
+	//指定对urlgo.micro.api/register处理的handler
+	proto.RegisterRegisterHandler(service.Server(), &handler.RegisterHandler{
 		// Create Service Client
-		Client: proto.NewRegisterService("go.micro.api.register", service.Client()),
+		//Client: proto.NewRegisterService("go.micro.srv.register", service.Client()),
 	})
-
-	// for handler use
 
 	// Run server
 	if err := service.Run(); err != nil {
