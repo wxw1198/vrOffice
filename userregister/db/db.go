@@ -9,15 +9,14 @@ import (
 	"github.com/wxw1198/vrOffice/utils"
 )
 
-//物料信息表
 type usersTbl struct {
 	tableName string
 }
 
-var spyDB *sql.DB
+var usersDB *sql.DB
 var UsersTbl usersTbl
 
-var spyConnectParam string
+var userDBConnectParam string
 
 func init() {
 	UsersTbl.tableName = "usersTable"
@@ -69,8 +68,8 @@ func init() {
 		dbName = sec.Body()
 	}
 
-	spyConnectParam = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", userName, password, listenIp, listenPort, dbName)
-	fmt.Println(spyConnectParam)
+	userDBConnectParam = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", userName, password, listenIp, listenPort, dbName)
+	fmt.Println(userDBConnectParam)
 }
 
 func openDB(mysqlParam string) (bool, *sql.DB) {
@@ -94,7 +93,7 @@ func (t usersTbl) Insert(username, password, server string) bool {
 	insertSql := fmt.Sprintf("INSERT INTO %s(username,password,authorization, servername) VALUES('%s','%s','%s','%s')", t.tableName, username, password, encodedSign, server)
 	fmt.Println("insertSql:", insertSql)
 
-	return dbExec(spyConnectParam, insertSql)
+	return dbExec(userDBConnectParam, insertSql)
 }
 
 //处理insert /update /del
@@ -132,7 +131,7 @@ func (t usersTbl) SelectAuthAndServerName() map[string]string {
 
 	fmt.Println(sqlQuery)
 
-	return dbQueryAuthAndServername(spyConnectParam, sqlQuery)
+	return dbQueryAuthAndServername(userDBConnectParam, sqlQuery)
 }
 
 //处理查询命令，结果返回json格式数据
@@ -192,7 +191,7 @@ func (t usersTbl) SelectAll() string {
 
 	fmt.Println(sqlQuery)
 
-	return dbQuery(spyConnectParam, sqlQuery)
+	return dbQuery(userDBConnectParam, sqlQuery)
 }
 
 //处理查询命令，结果返回json格式数据
@@ -215,12 +214,15 @@ func dbQuery(connectParam, sql string) string {
 
 func (t usersTbl) UpdateServer(username, servername string) bool {
 	updateSql := fmt.Sprintf("update %s set servername ='%s' where username='%s'", t.tableName, servername, username)
-	return dbExec(spyConnectParam, updateSql)
+	return dbExec(userDBConnectParam, updateSql)
 }
 
 func (t usersTbl) UpdatePassword(username, password string) bool {
 	autu := utils.HmacSha1(username, password)
 	encodedSign := base64.RawURLEncoding.EncodeToString(autu)
 	updateSql := fmt.Sprintf("update %s set authorization ='%s',password ='%s' where username='%s'", t.tableName, encodedSign, password, username)
-	return dbExec(spyConnectParam, updateSql)
+	return dbExec(userDBConnectParam, updateSql)
 }
+
+
+MobileNumExist

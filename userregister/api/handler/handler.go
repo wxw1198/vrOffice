@@ -71,11 +71,11 @@ func (g *RegisterHandler) RegisterUser(ctx context.Context, req *proto.Request, 
 
 	// 2 检查是否已经注册
 	// 2.1 手机号
-	if db.mobileNumExist() {
+	if db.MobileNumExist() {
 		return errMobileExist
 	}
 	// 2.2 用户名
-	if db.userNameExist() {
+	if db.UserNameExist() {
 		return errUserExist
 	}
 
