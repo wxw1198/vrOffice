@@ -19,6 +19,5 @@ var DefaultConfig = config{
 }
 
 func ParseConfig(c *config) bool {
-
 	return true
 }

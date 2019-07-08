@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package go.micro.api.unregister;
+
+service UnRegister {
+    rpc UnRegisterUser(Request) returns (Response) {}
+}
+
+message Request {
+    string mobileNum = 1;
+    string name = 2;
+}
+
+message Response {
+    string msg = 1;
+}

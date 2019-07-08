@@ -1,0 +1,18 @@
+C:\bin\protoc.exe --go_out=C:\test   -I=D:\git\go\src\github.com\wxw1198\vrOffice\userregister\proto\  userRegister.proto
+
+C:\Users\asus>C:\bin\protoc.exe --go_out=C:\test   -I=D:\git\go\src\github.com\wxw1198\vrOffice\userregister\proto\  userRegister.proto
+
+C:\bin\protoc.exe --go_out=. userRegister.proto
+
+C:\bin\protoc.exe --go_out=plugins=grpc:. userRegister.proto
+
+micro-gen使用
+https://blog.csdn.net/chenxun_2010/article/details/80949539
+
+
+C:\bin\protoc.exe --proto_path=$GOPATH/src:. --micro_out=. --go_out=. userRegister.proto
+
+
+C:\bin\protoc.exe  --micro_out=. --go_out=. userRegister.proto
+
+D:\git\go\src\github.com\wxw1198\vrOffice\userregister\proto>C:\bin\protoc.exe  --micro_out=. --go_out=. userRegister.proto
