@@ -15,16 +15,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-ini/ini"
 	log4plus "github.com/alecthomas/log4go"
 )
 
 var Log log4plus.Logger
-var ConfigFile *ini.File
-
 func init() {
 	var err error
-	ConfigFile,err = ini.Load("config.ini","")
+
 	Log = log4plus.NewLogger()
 
 	err = os.MkdirAll("/var/log/go", os.ModePerm)

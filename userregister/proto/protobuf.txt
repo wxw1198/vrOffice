@@ -16,3 +16,5 @@ C:\bin\protoc.exe --proto_path=$GOPATH/src:. --micro_out=. --go_out=. userRegist
 C:\bin\protoc.exe  --micro_out=. --go_out=. userRegister.proto
 
 D:\git\go\src\github.com\wxw1198\vrOffice\userregister\proto>C:\bin\protoc.exe  --micro_out=. --go_out=. userRegister.proto
+
+C:\bin\protoc.exe  --micro_out=. --go_out=. userUnregister.proto

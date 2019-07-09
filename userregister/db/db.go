@@ -4,72 +4,65 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"fmt"
+	"github.com/go-ini/ini"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/wxw1198/vrOffice/utils"
 )
 
 type usersTbl struct {
-	tableName string
+	tableName      string
+	dbConnectParam string
 }
 
 var usersDB *sql.DB
-var UsersTbl usersTbl
 
-var userDBConnectParam string
-
-func init() {
-	UsersTbl.tableName = "usersTable"
-
+func (t *usersTbl) readConfig(iniFilePath string) error {
 	var (
-		listenIp string
-		listenPort  string
-		userName string
-		password string
-		dbName string
+		listenIp   string
+		listenPort string
+		userName   string
+		password   string
+		dbName     string
 	)
-	sec, err := utils.ConfigFile.GetSection("sqlip")
-	if err != nil {
-		utils.Log.Error("ini file ,sqlip is not set")
-		listenIp = "127.0.0.1"
-	} else {
-		listenIp = sec.Body()
+
+	if iniFilePath == ""{
+		iniFilePath = "config.ini"
 	}
 
-	sec, err = utils.ConfigFile.GetSection("sqlport")
+	conFile, err := ini.Load(iniFilePath, "")
+	sec, err := conFile.GetSection("mysql")
 	if err != nil {
-		utils.Log.Error("ini file ,sqlport is not set")
-		listenPort = "3306"
+		utils.Log.Error("ini file ,mysql is not set")
+		return err
 	} else {
-		listenPort = sec.Body()
+		listenIp = sec.Key("sqlip").String()
+		if listenIp == "" {
+			listenIp = "127.0.0.1"
+		}
+
+		listenPort = sec.Key("sqlport").String()
+		if listenPort == "" {
+			listenPort = "3306"
+		}
+
+		userName = sec.Key("username").String()
+		password = sec.Key("password").String()
+		t.tableName = sec.Key("usertablename").String()
 	}
 
-	sec, err = utils.ConfigFile.GetSection("username")
-	if err != nil {
-		utils.Log.Error("ini file ,username is not set")
-		userName = ""
-	} else {
-		userName = sec.Body()
-	}
+	t.dbConnectParam = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", userName, password, listenIp, listenPort, dbName)
+	fmt.Println(t.dbConnectParam)
+	return nil
+}
 
-	sec, err = utils.ConfigFile.GetSection("password")
+func NewTable(iniFilePath string) *usersTbl {
+	t := &usersTbl{}
+	err := t.readConfig(iniFilePath)
 	if err != nil {
-		utils.Log.Error("ini file ,password is not set")
-		password = ""
-	} else {
-		password = sec.Body()
+		return nil
 	}
-
-	sec, err = utils.ConfigFile.GetSection("dbname")
-	if err != nil {
-		utils.Log.Error("ini file ,password is not set")
-		dbName = ""
-	} else {
-		dbName = sec.Body()
-	}
-
-	userDBConnectParam = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", userName, password, listenIp, listenPort, dbName)
-	fmt.Println(userDBConnectParam)
+	return t
 }
 
 func openDB(mysqlParam string) (bool, *sql.DB) {
@@ -93,7 +86,7 @@ func (t usersTbl) Insert(username, password, server string) bool {
 	insertSql := fmt.Sprintf("INSERT INTO %s(username,password,authorization, servername) VALUES('%s','%s','%s','%s')", t.tableName, username, password, encodedSign, server)
 	fmt.Println("insertSql:", insertSql)
 
-	return dbExec(userDBConnectParam, insertSql)
+	return dbExec(t.dbConnectParam, insertSql)
 }
 
 //处理insert /update /del
@@ -131,12 +124,11 @@ func (t usersTbl) SelectAuthAndServerName() map[string]string {
 
 	fmt.Println(sqlQuery)
 
-	return dbQueryAuthAndServername(userDBConnectParam, sqlQuery)
+	return dbQueryAuthAndServername(t.dbConnectParam, sqlQuery)
 }
 
 //处理查询命令，结果返回json格式数据
 func dbQueryAuthAndServername(connectParam, sql string) map[string]string {
-
 	retSets := make(map[string]string)
 
 	//如果有多个defer表达式，调用顺序类似于栈，越后面的defer表达式越先被调用。
@@ -191,7 +183,7 @@ func (t usersTbl) SelectAll() string {
 
 	fmt.Println(sqlQuery)
 
-	return dbQuery(userDBConnectParam, sqlQuery)
+	return dbQuery(t.dbConnectParam, sqlQuery)
 }
 
 //处理查询命令，结果返回json格式数据
@@ -214,15 +206,17 @@ func dbQuery(connectParam, sql string) string {
 
 func (t usersTbl) UpdateServer(username, servername string) bool {
 	updateSql := fmt.Sprintf("update %s set servername ='%s' where username='%s'", t.tableName, servername, username)
-	return dbExec(userDBConnectParam, updateSql)
+	return dbExec(t.dbConnectParam, updateSql)
 }
 
 func (t usersTbl) UpdatePassword(username, password string) bool {
 	autu := utils.HmacSha1(username, password)
 	encodedSign := base64.RawURLEncoding.EncodeToString(autu)
 	updateSql := fmt.Sprintf("update %s set authorization ='%s',password ='%s' where username='%s'", t.tableName, encodedSign, password, username)
-	return dbExec(userDBConnectParam, updateSql)
+	return dbExec(t.dbConnectParam, updateSql)
 }
 
 
-MobileNumExist
+func (t usersTbl)MobileNumExist(mobileNum string)bool{
+	return false
+}
