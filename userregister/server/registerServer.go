@@ -1,24 +1,59 @@
 package server
 
+
+//数据服务器，负责数据写入到REDIS MYSQL
+
 import (
-	"github.com/micro/go-micro/registry"
-	"github.com/micro/go-plugins/registry/etcdv3"
+	"context"
 	"log"
 	"time"
 
-	//hello "github.com/micro/examples/greeter/srv/proto/hello"
-	proto "github.com/wxw1198/vrOffice/userregister/proto"
 	"github.com/micro/go-micro"
-
-	"context"
+	"github.com/micro/go-micro/errors"
+	"github.com/micro/go-micro/registry"
+	"github.com/micro/go-plugins/registry/etcdv3"
+	"github.com/wxw1198/vrOffice/userregister/proto"
 )
 
-type RegisterServer struct{}
+var (
+	registerId     = "101" //待修改
+	errMobileExist = errors.New(registerId, "mobile registed again", 2)
+	errUserExist   = errors.New(registerId, "user is exist", 3)
+	errDeleting    = errors.New(registerId, " unregister error", 4)
+)
+
+type dbRegisterInterface interface {
+	MobileNumExist(string) bool
+	UserNameExist(string) bool
+	RegisterToDB(*proto.Request) bool
+}
+
+type RegisterServer struct {
+	db dbRegisterInterface
+}
 
 func (r *RegisterServer) RegisterUser(ctx context.Context, req *proto.Request, rsp *proto.Response) error {
-	log.Print("Received Say.Hello request")
+
 	rsp.Msg = "Hello ____" + req.Name
 	log.Print("recv :", req.Name)
+
+	// 1 检查是否已经注册
+	// 1.1 手机号
+	if r.db.MobileNumExist(req.MobileNum) {
+		rsp.Msg = errMobileExist.Error()
+		return errMobileExist
+	}
+	// 1.2 用户名
+	if r.db.UserNameExist(req.Name) {
+		rsp.Msg = errUserExist.Error()
+		return errUserExist
+	}
+
+	// 2 数据入库
+	b := r.db.RegisterToDB(req)
+	if !b {
+		rsp.Msg = "data to db err"
+	}
 
 	return nil
 }
@@ -30,12 +65,11 @@ func main() {
 	//	}
 	//})
 
-	reg := etcdv3.NewRegistry(func(op *registry.Options){
-			op.Addrs = []string{
-				"47.88.230.122:55556",
-			}
-		})
-
+	reg := etcdv3.NewRegistry(func(op *registry.Options) {
+		op.Addrs = []string{
+			"47.88.230.122:55556",
+		}
+	})
 
 	//etcdv3.NewRegistry()
 	//mdns.NewMDNSService()

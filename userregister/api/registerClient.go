@@ -40,8 +40,8 @@ func main() {
 
 	//指定对urlgo.micro.api/register处理的handler
 	proto.RegisterRegisterHandler(service.Server(), &handler.RegisterHandler{
-		// Create Service Client
-		//Client: proto.NewRegisterService("go.micro.srv.register", service.Client()),
+		//Create Service Client
+		Client: proto.NewRegisterService("go.micro.srv.register", service.Client()),
 	})
 
 	// Run server
