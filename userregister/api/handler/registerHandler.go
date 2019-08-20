@@ -24,7 +24,7 @@ type taskInfo struct {
 }
 
 type delTaskInfo struct {
-	taskList  chan *proto.UnRegisterRequest
+	taskList  chan *proto.UnRegRequest
 	taskFound map[string]struct{} //手机号作为Key
 	resultCh  chan struct{}
 	//mutex     sync.Mutex
@@ -34,7 +34,7 @@ var ti taskInfo
 
 func Start() {
 	ti = taskInfo{taskList: make(chan *proto.Request, 1024)}
-	dti = delTaskInfo{taskList: make(chan *proto.UnRegisterRequest, 1024)}
+	dti = delTaskInfo{taskList: make(chan *proto.UnRegRequest, 1024)}
 }
 
 type RegisterHandler struct {

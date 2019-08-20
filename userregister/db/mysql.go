@@ -18,7 +18,6 @@ type usersTbl struct {
 
 var usersDB *sql.DB
 
-
 func (t *usersTbl) readConfig(iniFilePath string) error {
 	var (
 		listenIp   string
@@ -28,7 +27,7 @@ func (t *usersTbl) readConfig(iniFilePath string) error {
 		dbName     string
 	)
 
-	if iniFilePath == ""{
+	if iniFilePath == "" {
 		iniFilePath = "config.ini"
 	}
 
@@ -119,65 +118,6 @@ func dbExec(connectParam, sql string) bool {
 }
 
 //返回map ,key 是authorization, value 是 servername
-func (t usersTbl) SelectAuthAndServerName() map[string]string {
-	var sqlQuery string
-
-	sqlQuery = fmt.Sprintf("SELECT authorization,servername FROM %s", t.tableName)
-
-	fmt.Println(sqlQuery)
-
-	return dbQueryAuthAndServername(t.dbConnectParam, sqlQuery)
-}
-
-//处理查询命令，结果返回json格式数据
-func dbQueryAuthAndServername(connectParam, sql string) map[string]string {
-	retSets := make(map[string]string)
-
-	//如果有多个defer表达式，调用顺序类似于栈，越后面的defer表达式越先被调用。
-	b, db := openDB(connectParam)
-	if b == false {
-		return retSets
-	}
-	defer db.Close()
-
-	rows, err := db.Query(sql)
-	if err != nil {
-		fmt.Println("selectAllContent err:%v", err)
-		return retSets
-	}
-	defer rows.Close()
-
-	columns, err := rows.Columns()
-	if err != nil {
-		fmt.Println("row to json:", err)
-		return retSets
-	}
-
-	count := len(columns)
-	values := make([]interface{}, count)
-	valuePtrs := make([]interface{}, count)
-	for rows.Next() {
-		for i := 0; i < count; i++ {
-			valuePtrs[i] = &values[i]
-		}
-		rows.Scan(valuePtrs...)
-
-		v0, ok := values[0].([]byte)
-		if ok {
-			if v1, ok := values[1].([]byte); ok {
-				retSets[string(v0)] = string(v1)
-				continue
-			}
-		}
-
-		utils.Log.Error("select table err:%s", connectParam)
-		return retSets
-	}
-
-	return retSets
-}
-
-//返回map ,key 是authorization, value 是 servername
 func (t usersTbl) SelectAll() string {
 	var sqlQuery string
 
@@ -218,17 +158,29 @@ func (t usersTbl) UpdatePassword(username, password string) bool {
 	return dbExec(t.dbConnectParam, updateSql)
 }
 
-
-func (t usersTbl)MobileNumExist(mobileNum string)bool{
+func (t usersTbl) MobileNumExist(mobileNum string) bool {
+	sqlQuery := fmt.Sprintf("SELECT mobile,name,password FROM %s where mobile='%s'", t.tableName, mobileNum)
+	ret := dbQuery(t.dbConnectParam, sqlQuery)
+	if len(ret) > 0 {
+		return true
+	}
 	return false
 }
 
+//func (t usersTbl) UserNameExist(name string) bool {
+//	sqlQuery := fmt.Sprintf("SELECT mobile,name,password FROM %s where name='%s'", t.tableName, name)
+//	ret := dbQuery(t.dbConnectParam, sqlQuery)
+//	if len(ret) > 0 {
+//		return true
+//	}
+//
+//	return false
+//}
 
-func (t usersTbl)UserNameExist(name string)bool {
+func (t usersTbl) RegisterToDB(req *proto.Request)bool {
+	insertSql := fmt.Sprintf("INSERT INTO %s(mobile,name,password) VALUES('%s','%s','%s')", t.tableName, req.MobileNum,req.Name,req.Password)
+	fmt.Println("insertSql:", insertSql)
 
-	return false
-}
-
-func (t usersTbl)RegisterToDB(req *proto.Request)  {
+	return dbExec(t.dbConnectParam, insertSql)
 	// todo
 }

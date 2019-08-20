@@ -35,6 +35,7 @@ var _ server.Option
 
 type RegisterService interface {
 	RegisterUser(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
+	UnRegisterUser(ctx context.Context, in *UnRegRequest, opts ...client.CallOption) (*UnRegResponse, error)
 }
 
 type registerService struct {
@@ -65,15 +66,27 @@ func (c *registerService) RegisterUser(ctx context.Context, in *Request, opts ..
 	return out, nil
 }
 
+func (c *registerService) UnRegisterUser(ctx context.Context, in *UnRegRequest, opts ...client.CallOption) (*UnRegResponse, error) {
+	req := c.c.NewRequest(c.name, "Register.UnRegisterUser", in)
+	out := new(UnRegResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Register service
 
 type RegisterHandler interface {
 	RegisterUser(context.Context, *Request, *Response) error
+	UnRegisterUser(context.Context, *UnRegRequest, *UnRegResponse) error
 }
 
 func RegisterRegisterHandler(s server.Server, hdlr RegisterHandler, opts ...server.HandlerOption) error {
 	type register interface {
 		RegisterUser(ctx context.Context, in *Request, out *Response) error
+		UnRegisterUser(ctx context.Context, in *UnRegRequest, out *UnRegResponse) error
 	}
 	type Register struct {
 		register
@@ -88,4 +101,8 @@ type registerHandler struct {
 
 func (h *registerHandler) RegisterUser(ctx context.Context, in *Request, out *Response) error {
 	return h.RegisterHandler.RegisterUser(ctx, in, out)
+}
+
+func (h *registerHandler) UnRegisterUser(ctx context.Context, in *UnRegRequest, out *UnRegResponse) error {
+	return h.RegisterHandler.UnRegisterUser(ctx, in, out)
 }

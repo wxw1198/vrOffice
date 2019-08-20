@@ -1,17 +1,31 @@
 syntax = "proto3";
 
-package go.micro.api.register;
+package proto;
+
+//package go.micro.api.register;
 
 service Register {
 	rpc RegisterUser(Request) returns (Response) {}
+
+	rpc UnRegisterUser(UnRegRequest) returns (UnRegResponse) {}
 }
 
 message Request {
-    string mobileNum = 1;
+	string mobileNum = 1;
 	string name = 2;
 	string password = 3;
 }
 
 message Response {
+	string msg = 1;
+}
+
+message UnRegRequest {
+	string mobileNum = 1;
+	string name = 2;
+	string password = 3;
+}
+
+message UnRegResponse {
 	string msg = 1;
 }

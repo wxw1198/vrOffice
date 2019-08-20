@@ -11,9 +11,11 @@ create_db_sql="create database IF NOT EXISTS ${DBNAME} CHARACTER SET 'utf8' COLL
 mysql -h${HOSTNAME}  -P${PORT}  -u${USERNAME} -p${PASSWORD} -e "${create_db_sql}"
  
 #create program table
-create_table_program="create table IF NOT EXISTS ${TABLENAME} (  
-userID bigint UNSIGNED NOT NULL Primary KEY AUTO_INCREMENT, 
-name varchar(64),  #key
+create_user_table="create table IF NOT EXISTS ${TABLENAME} (
+#userID bigint UNSIGNED NOT NULL Primary KEY AUTO_INCREMENT,
+name varchar(64),
 password varchar(128) default '',
-mobile varchar(11))"  #key
-mysql -h${HOSTNAME}  -P${PORT}  -u${USERNAME} -p${PASSWORD} ${DBNAME} -e "${create_table_program}"
+mobile varchar(11) Primary KEY,  #key
+gender varchar(1),
+birthday date)"
+mysql -h${HOSTNAME}  -P${PORT}  -u${USERNAME} -p${PASSWORD} ${DBNAME} -e "${create_user_table}"

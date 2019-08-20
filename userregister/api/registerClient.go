@@ -9,7 +9,7 @@ import (
 
 	"github.com/wxw1198/vrOffice/userregister/api/handler"
 	"github.com/wxw1198/vrOffice/userregister/api/config"
-	proto "github.com/wxw1198/vrOffice/userregister/proto"
+	"github.com/wxw1198/vrOffice/userregister/proto"
 )
 
 func main() {
@@ -39,6 +39,7 @@ func main() {
 	service.Server().Init(server.Advertise(config.DefaultConfig.AdvertiseAddr))
 
 	//指定对urlgo.micro.api/register处理的handler
+	//proto.RegisterRegisterHandler(service.Server(), &handler.RegisterHandler{})
 	proto.RegisterRegisterHandler(service.Server(), &handler.RegisterHandler{
 		//Create Service Client
 		Client: proto.NewRegisterService("go.micro.srv.register", service.Client()),

@@ -2,24 +2,28 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
+	"log"
 	"strings"
 
+	"github.com/micro/go-micro/errors"
 	"github.com/wxw1198/vrOffice/userregister/proto"
+)
+
+var (
+	errDeleting = errors.New(registerId, " unregister error", 4)
 )
 
 type dbUnRegisterInterface interface {
 	MobileNumExist(string) bool
 	UserNameExist(string) bool
-	UnRegisterFromDB(request *proto.UnRegisterRequest)
+	UnRegisterFromDB(request *proto.UnRegRequest)
 }
-type DeleteHandler struct {
-	db dbUnRegisterInterface
-	//Client proto.RegisterService
-}
+
 
 var dti delTaskInfo
 
-func (g *DeleteHandler) DeleteUser(ctx context.Context, req *proto.UnRegisterRequest, rsp *proto.Response) error {
+func (g *RegisterHandler) UnRegisterUser(ctx context.Context, req *proto.UnRegRequest, rsp *proto.UnRegResponse) error {
 	// 0 检查注册参数
 	checkParm := func() bool {
 		if req.MobileNum == "" || req.Name == "" {
@@ -35,18 +39,8 @@ func (g *DeleteHandler) DeleteUser(ctx context.Context, req *proto.UnRegisterReq
 	}
 
 	//1 检查是否请求已经在队列里面
-	if _, ok := ti.taskFound[req.MobileNum]; ok {
+	if _, ok := dti.taskFound[req.MobileNum]; ok {
 		return errDeleting
-	}
-
-	// 2 检查是否已经注册
-	// 2.1 手机号
-	if !g.db.MobileNumExist(req.MobileNum) {
-		return errMobileExist
-	}
-	// 2.2 用户名
-	if !g.db.UserNameExist(req.Name) {
-		return errUserExist
 	}
 
 	// 3 入队列，然后等待
@@ -57,8 +51,17 @@ func (g *DeleteHandler) DeleteUser(ctx context.Context, req *proto.UnRegisterReq
 	go func() {
 		select {
 		case e := <-dti.taskList:
-			//3 开协程，启动信息入库
-			g.db.UnRegisterFromDB(e)
+			response, err := g.Client.UnRegisterUser(ctx, e)
+			if err != nil {
+				log.Fatal(err)
+				rsp.Msg = err.Error()
+			}
+
+			b, _ := json.Marshal(map[string]string{
+				"message": response.Msg,
+			})
+
+			rsp.Msg = string(b)
 			reqChan <- true
 			return
 		}
@@ -67,7 +70,5 @@ func (g *DeleteHandler) DeleteUser(ctx context.Context, req *proto.UnRegisterReq
 	// 4 等待注册结束
 	<-reqChan
 
-	// set api response
-	rsp.Msg = "register success"
 	return nil
 }

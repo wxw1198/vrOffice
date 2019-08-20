@@ -3,7 +3,16 @@
   git config --global user.name "wxw1198"
   
   
-  
+
+req(用户) --->micro(gw)---->etcdv3 ------>micro(gw) ----->api(注册或者注销) ----> etcdv3---->api(注册或者注销)---->
+
+ ----> dataServer  ----->返回到api --->返回给micro ---->返回给用户（req)
+
+
+搭建环境：etcdv3 / micro分别启动， 然后再启动vrOffice中的注册模块
+
+
+
  ./etcd  --initial-advertise-peer-urls http://0.0.0.0:8081 --listen-peer-urls http://0.0.0.0:8081 --listen-client-urls http://0.0.0.0:55556 --advertise-client-urls http://0.0.0.0:55556 
  
  

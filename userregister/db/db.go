@@ -6,9 +6,15 @@ import (
 
 type dbServer struct {
 	diskDB *usersTbl
-	cache * userRegisterRedis
+	cache  *userRegisterRedis
 }
 
+func NewDBServer() *dbServer {
+	return &dbServer{
+		diskDB: NewTable(""),
+		cache:  NewUserRegister(),
+	}
+}
 
 func (db dbServer) MobileNumExist(mobileNum string) bool {
 
@@ -20,18 +26,17 @@ func (db dbServer) MobileNumExist(mobileNum string) bool {
 	return true
 }
 
-func (db dbServer) UserNameExist(name string) bool {
-	b := db.cache.UserNameExist(name)
-	if !b {
-		return db.diskDB.UserNameExist(name)
-	}
 
-	return true
-}
-
-func (db dbServer) RegisterToDB(req *proto.Request) {
+func (db dbServer) RegisterToDB(req *proto.Request) bool {
 	db.cache.RegisterToDB(req)
 
-	db.diskDB.RegisterToDB(req)
+	return db.diskDB.RegisterToDB(req)
 }
 
+
+
+func (db dbServer)UnRegisterFromDB(req *proto.UnRegisterRequest){
+	db.cache.UnRegisterFromDB(req)
+
+	return db.diskDB.UnRegisterFromDB(req)
+}

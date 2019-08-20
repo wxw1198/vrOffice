@@ -6,7 +6,6 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/wxw1198/vrOffice/userregister/proto"
 	"log"
-	"strings"
 	"time"
 )
 
@@ -40,24 +39,16 @@ func (u userRegisterRedis) MobileNumExist(mobileNum string) bool {
 		return false
 	}
 
-	return strings.Contains(val, mobileNum)
+	req := proto.Request{}
+	json.Unmarshal([]byte(val),&req)
+
+	return req.MobileNum == mobileNum
 }
 
-func (u userRegisterRedis) UserNameExist(name string) bool {
-	val, err := u.redisdb.Get(name).Result()
-	if err != nil {
-		fmt.Printf("get score failed, err:%v\n", err)
-		return false
-	}
-
-	return strings.Contains(val, name)
-}
 
 func (u userRegisterRedis) RegisterToDB(req *proto.Request) {
 	val, _ := json.Marshal(req)
 
 	u.redisdb.Set(req.Name, val, time.Minute*12)
 	u.redisdb.Set(req.MobileNum, val, time.Minute*12)
-
-	// todo mysql
 }
