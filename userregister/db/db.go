@@ -17,7 +17,6 @@ func NewDBServer() *dbServer {
 }
 
 func (db dbServer) MobileNumExist(mobileNum string) bool {
-
 	b := db.cache.MobileNumExist(mobileNum)
 	if !b {
 		return db.diskDB.MobileNumExist(mobileNum)
@@ -26,17 +25,20 @@ func (db dbServer) MobileNumExist(mobileNum string) bool {
 	return true
 }
 
-
+//注册时，要求强一致性
 func (db dbServer) RegisterToDB(req *proto.Request) bool {
+	db.diskDB.RegisterToDB(req)
 	db.cache.RegisterToDB(req)
 
-	return db.diskDB.RegisterToDB(req)
+	return true
 }
 
 
+//注销时，要求强一致性
+func (db dbServer)UnRegisterFromDB(req *proto.UnRegRequest)bool{
 
-func (db dbServer)UnRegisterFromDB(req *proto.UnRegisterRequest){
+	db.diskDB.UnRegisterFromDB(req)
 	db.cache.UnRegisterFromDB(req)
 
-	return db.diskDB.UnRegisterFromDB(req)
+	return true
 }

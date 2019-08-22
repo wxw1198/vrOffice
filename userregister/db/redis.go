@@ -49,6 +49,12 @@ func (u userRegisterRedis) MobileNumExist(mobileNum string) bool {
 func (u userRegisterRedis) RegisterToDB(req *proto.Request) {
 	val, _ := json.Marshal(req)
 
-	u.redisdb.Set(req.Name, val, time.Minute*12)
+	//u.redisdb.Set(req.Name, val, time.Minute*12)
 	u.redisdb.Set(req.MobileNum, val, time.Minute*12)
+}
+
+
+func (u userRegisterRedis)UnRegisterFromDB(req *proto.UnRegRequest){
+
+	u.redisdb.Del(req.MobileNum)
 }

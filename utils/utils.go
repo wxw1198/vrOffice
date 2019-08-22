@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"math/rand"
 	"net/http"
 	"os"
@@ -15,23 +17,26 @@ import (
 	"strings"
 	"time"
 
-	log4plus "github.com/alecthomas/log4go"
+
+     "github.com/natefinch/lumberjack"
 )
 
-var Log log4plus.Logger
+//var Log log4plus.Logger
+
+var Log *zap.SugaredLogger
 func init() {
-	var err error
-
-	Log = log4plus.NewLogger()
-
-	err = os.MkdirAll("/var/log/go", os.ModePerm)
-	if err != nil {
-		fmt.Println("dealCompress MkdirAll, err:%v", err)
-	}
-
-	flw := log4plus.NewFileLogWriter("/var/log/go/"+"vroffice", true)
-	flw.SetRotateDaily(true)
-	Log.AddFilter("file", log4plus.DEBUG, flw) //输出到文件,级别为DEBUG,文件名为test.log,每次追加该原文件
+	fileName := "micro-srv.log"
+	syncWriter := zapcore.AddSync(&lumberjack.Logger{
+		Filename:  fileName,
+		MaxSize:   128, //MB
+		LocalTime: true,
+		Compress:  true,
+	})
+	encoder := zap.NewProductionEncoderConfig()
+	encoder.EncodeTime = zapcore.ISO8601TimeEncoder
+	core := zapcore.NewCore(zapcore.NewJSONEncoder(encoder), syncWriter, zap.NewAtomicLevelAt(zap.DebugLevel))
+	log := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+	Log = log.Sugar()
 }
 
 //获取一个随机数

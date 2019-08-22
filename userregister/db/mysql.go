@@ -184,3 +184,12 @@ func (t usersTbl) RegisterToDB(req *proto.Request)bool {
 	return dbExec(t.dbConnectParam, insertSql)
 	// todo
 }
+
+
+func (t usersTbl) UnRegisterFromDB(req *proto.UnRegRequest) bool{
+   delSql := fmt.Sprintf("DELETE FROM '%s' WHERE mobile='%s'",  t.tableName, req.MobileNum)
+
+	fmt.Println("insertSql:", delSql)
+
+	return dbExec(t.dbConnectParam, delSql)
+}

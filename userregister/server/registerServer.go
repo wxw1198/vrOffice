@@ -1,19 +1,15 @@
 package server
 
-
 //数据服务器，负责数据写入到REDIS MYSQL
 
 import (
 	"context"
 	"log"
-	"time"
 
-	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/errors"
-	"github.com/micro/go-micro/registry"
-	"github.com/micro/go-plugins/registry/etcdv3"
-	"github.com/wxw1198/vrOffice/userregister/proto"
 	"github.com/wxw1198/vrOffice/userregister/db"
+	"github.com/wxw1198/vrOffice/userregister/proto"
+	"github.com/wxw1198/vrOffice/utils"
 )
 
 var (
@@ -24,16 +20,17 @@ var (
 
 type dbRegisterInterface interface {
 	MobileNumExist(string) bool
-	RegisterToDB(*proto.Request)bool
+	RegisterToDB(*proto.Request) bool
+	UnRegisterFromDB(request *proto.UnRegRequest) bool
 }
 
 type RegisterServer struct {
 	db dbRegisterInterface
 }
 
-func NewRegisterServer()*RegisterServer  {
+func NewRegisterServer() *RegisterServer {
 	return &RegisterServer{
-		db:db.NewDBServer(),
+		db: db.NewDBServer(),
 	}
 }
 
@@ -52,13 +49,14 @@ func (r *RegisterServer) RegisterUser(ctx context.Context, req *proto.Request, r
 	// 2 数据入库
 	b := r.db.RegisterToDB(req)
 	if !b {
+		utils.Log.With(req).Error("RegisterToDB fail")
 		rsp.Msg = "data to db err"
 	}
 
 	return nil
 }
 
-func (r *RegisterServer) UnRegisterUser(ctx context.Context, req *proto.UnRegisterRequest, rsp *proto.UnRegisterResponse) error {
+func (r *RegisterServer) UnRegisterUser(ctx context.Context, req *proto.UnRegRequest, rsp *proto.UnRegResponse) error {
 
 	rsp.Msg = "Hello ____" + req.Name
 	log.Print("UnRegisterUser :", req.Name)
@@ -73,46 +71,9 @@ func (r *RegisterServer) UnRegisterUser(ctx context.Context, req *proto.UnRegist
 	// 2 数据入库
 	b := r.db.UnRegisterFromDB(req)
 	if !b {
+		utils.Log.With(req).Error("UnRegisterFromDB fail")
 		rsp.Msg = "data to db err"
 	}
 
 	return nil
-}
-
-func main() {
-	//reg := etcdv3.NewRegistry(func(op *registry.Options){
-	//	op.Addrs = []string{
-	//		"http://192.168.3.34:2379", "http://192.168.3.18:2379", "http://192.168.3.110:2379",
-	//	}
-	//})
-
-	reg := etcdv3.NewRegistry(func(op *registry.Options) {
-		op.Addrs = []string{
-			"47.88.230.122:55556",
-		}
-	})
-
-	//etcdv3.NewRegistry()
-	//mdns.NewMDNSService()
-	//zookeeper.NewRegistry()
-	//kubernetes.NewRegistry()
-	service := micro.NewService(
-		micro.Name("go.micro.srv.register"),
-		micro.RegisterTTL(time.Second*30),
-		micro.RegisterInterval(time.Second*10),
-		micro.Registry(reg),
-		//micro.Address("127.0.0.1:5555"),
-	)
-
-
-	// optionally setup command line usage
-	service.Init()
-
-	// Register Handlers
-	proto.RegisterRegisterHandler(service.Server(), new(RegisterServer))
-
-	// Run server
-	if err := service.Run(); err != nil {
-		log.Fatal(err)
-	}
 }
