@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/micro/go-micro/errors"
-	"github.com/wxw1198/vrOffice/userregister/proto"
+	"github.com/wxw1198/vrOffice/userbaseoperation/proto"
 )
 
 var (
@@ -23,7 +23,7 @@ type dbUnRegisterInterface interface {
 
 var dti delTaskInfo
 
-func (g *RegisterHandler) UnRegisterUser(ctx context.Context, req *proto.UnRegRequest, rsp *proto.UnRegResponse) error {
+func (g *UserBaseOperationHandler) UnRegisterUser(ctx context.Context, req *proto.UnRegRequest, rsp *proto.UnRegResponse) error {
 	// 0 检查注册参数
 	checkParm := func() bool {
 		if req.MobileNum == "" || req.Name == "" {

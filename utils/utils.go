@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"math/rand"
 	"net/http"
 	"os"
@@ -16,27 +14,21 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-
-     "github.com/natefinch/lumberjack"
 )
 
-//var Log log4plus.Logger
-
-var Log *zap.SugaredLogger
 func init() {
-	fileName := "micro-srv.log"
-	syncWriter := zapcore.AddSync(&lumberjack.Logger{
-		Filename:  fileName,
-		MaxSize:   128, //MB
-		LocalTime: true,
-		Compress:  true,
-	})
-	encoder := zap.NewProductionEncoderConfig()
-	encoder.EncodeTime = zapcore.ISO8601TimeEncoder
-	core := zapcore.NewCore(zapcore.NewJSONEncoder(encoder), syncWriter, zap.NewAtomicLevelAt(zap.DebugLevel))
-	log := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
-	Log = log.Sugar()
+	//fileName := "micro-srv.log"
+	//syncWriter := zapcore.AddSync(&lumberjack.Logger{
+	//	Filename:  fileName,
+	//	MaxSize:   128, //MB
+	//	LocalTime: true,
+	//	Compress:  true,
+	//})
+	//encoder := zap.NewProductionEncoderConfig()
+	//encoder.EncodeTime = zapcore.ISO8601TimeEncoder
+	//core := zapcore.NewCore(zapcore.NewJSONEncoder(encoder), syncWriter, zap.NewAtomicLevelAt(zap.DebugLevel))
+	//log := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+	//Log = log.Sugar()
 }
 
 //获取一个随机数
@@ -195,4 +187,9 @@ func HmacSha1(content, key string) []byte {
 	mac.Write([]byte(content))
 
 	return mac.Sum(nil)
+}
+
+func RandNum() uint64 {
+	rand1 := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return rand1.Uint64()
 }

@@ -7,9 +7,9 @@ import (
 	"github.com/micro/go-plugins/registry/etcdv3"
 	"log"
 
-	"github.com/wxw1198/vrOffice/userregister/api/handler"
-	"github.com/wxw1198/vrOffice/userregister/api/config"
-	"github.com/wxw1198/vrOffice/userregister/proto"
+	"github.com/wxw1198/vrOffice/userbaseoperation/api/handler"
+	"github.com/wxw1198/vrOffice/userbaseoperation/api/config"
+	"github.com/wxw1198/vrOffice/userbaseoperation/proto"
 )
 
 func main() {
@@ -39,10 +39,10 @@ func main() {
 	service.Server().Init(server.Advertise(config.DefaultConfig.AdvertiseAddr))
 
 	//指定对urlgo.micro.api/register处理的handler
-	//proto.RegisterRegisterHandler(service.Server(), &handler.RegisterHandler{})
-	proto.RegisterRegisterHandler(service.Server(), &handler.RegisterHandler{
+	//proto.RegisterRegisterHandler(service.Server(), &handler.UserBaseOperationHandler{})
+	proto.RegisterUserBaseOpsHandler(service.Server(), &handler.UserBaseOperationHandler{
 		//Create Service Client
-		Client: proto.NewRegisterService("go.micro.srv.register", service.Client()),
+		Client: proto.NewUserBaseOpsService("go.micro.srv.register", service.Client()),
 	})
 
 	// Run server

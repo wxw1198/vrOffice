@@ -4,8 +4,8 @@ import (
 	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/registry"
 	"github.com/micro/go-plugins/registry/etcdv3"
-	"github.com/wxw1198/vrOffice/userregister/proto"
-	"github.com/wxw1198/vrOffice/userregister/server"
+	"github.com/wxw1198/vrOffice/userbaseoperation/proto"
+	"github.com/wxw1198/vrOffice/userbaseoperation/server"
 	"github.com/wxw1198/vrOffice/utils"
 
 	"time"
@@ -36,9 +36,9 @@ func main() {
 	service.Init()
 
 	// Register Handlers
-	//proto.RegisterRegisterHandler(service.Server(), new(RegisterServer))
+	//proto.RegisterRegisterHandler(service.Server(), new(UserBaseOpsServer))
 
-	proto.RegisterRegisterHandler(service.Server(), server.NewRegisterServer())
+	proto.RegisterUserBaseOpsHandler(service.Server(), server.NewUserBaseOpsServer())
 
 	// Run server
 	if err := service.Run(); err != nil {

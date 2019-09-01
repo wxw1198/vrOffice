@@ -3,9 +3,11 @@ package db
 import (
 	"database/sql"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/go-ini/ini"
-	"github.com/wxw1198/vrOffice/userregister/proto"
+	"github.com/wxw1198/vrOffice/log"
+	"github.com/wxw1198/vrOffice/userbaseoperation/proto"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/wxw1198/vrOffice/utils"
@@ -34,7 +36,7 @@ func (t *usersTbl) readConfig(iniFilePath string) error {
 	conFile, err := ini.Load(iniFilePath, "")
 	sec, err := conFile.GetSection("mysql")
 	if err != nil {
-		utils.Log.Error("ini file ,mysql is not set")
+		log.Error("ini file ,mysql is not set")
 		return err
 	} else {
 		listenIp = sec.Key("sqlip").String()
@@ -70,22 +72,19 @@ func openDB(mysqlParam string) (bool, *sql.DB) {
 	db, err := sql.Open("mysql", mysqlParam)
 	if err != nil { //连接成功 err一定是nil否则就是报错
 		fmt.Println(err.Error()) //仅仅是显示异常
-		utils.Log.Error(err.Error())
+		log.Error("openDB:", err.Error())
 		return false, nil
 	}
 	return true, db
 }
 
 func (t usersTbl) Insert(username, password, server string) bool {
-	fmt.Println("username:", username)
-	fmt.Println("password:", password)
-	fmt.Println("server:", server)
 
 	autu := utils.HmacSha1(username, password)
 	encodedSign := base64.RawURLEncoding.EncodeToString(autu)
 
 	insertSql := fmt.Sprintf("INSERT INTO %s(username,password,authorization, servername) VALUES('%s','%s','%s','%s')", t.tableName, username, password, encodedSign, server)
-	fmt.Println("insertSql:", insertSql)
+	log.Debug("insertSql:", insertSql)
 
 	return dbExec(t.dbConnectParam, insertSql)
 }
@@ -105,27 +104,16 @@ func dbExec(connectParam, sql string) bool {
 	ret, err := db.Exec(sql)
 	if err != nil {
 		fmt.Println("dbExec:", err.Error())
-		utils.Log.Error("dbExec:%s", err.Error())
+		log.Error("dbExec:%s", err.Error())
 		return false
 	}
 
 	nums, _ := ret.RowsAffected()
 	id, _ := ret.LastInsertId()
 
-	fmt.Println("dbExec:id", id, "num:", nums)
+	log.Debug("dbExec:id", id, "num:", nums)
 
 	return true
-}
-
-//返回map ,key 是authorization, value 是 servername
-func (t usersTbl) SelectAll() string {
-	var sqlQuery string
-
-	sqlQuery = fmt.Sprintf("SELECT username,authorization,servername FROM %s", t.tableName)
-
-	fmt.Println(sqlQuery)
-
-	return dbQuery(t.dbConnectParam, sqlQuery)
 }
 
 //处理查询命令，结果返回json格式数据
@@ -138,7 +126,7 @@ func dbQuery(connectParam, sql string) string {
 
 	rows, err := db.Query(sql)
 	if err != nil {
-		fmt.Println("selectAllContent err:%v", err)
+		log.Error("selectAllContent err:%v", err)
 		return ""
 	}
 	defer rows.Close()
@@ -167,29 +155,59 @@ func (t usersTbl) MobileNumExist(mobileNum string) bool {
 	return false
 }
 
-//func (t usersTbl) UserNameExist(name string) bool {
-//	sqlQuery := fmt.Sprintf("SELECT mobile,name,password FROM %s where name='%s'", t.tableName, name)
-//	ret := dbQuery(t.dbConnectParam, sqlQuery)
-//	if len(ret) > 0 {
-//		return true
-//	}
-//
-//	return false
-//}
-
-func (t usersTbl) RegisterToDB(req *proto.Request)bool {
-	insertSql := fmt.Sprintf("INSERT INTO %s(mobile,name,password) VALUES('%s','%s','%s')", t.tableName, req.MobileNum,req.Name,req.Password)
-	fmt.Println("insertSql:", insertSql)
+func (t usersTbl) RegisterToDB(req *proto.RegRequest) bool {
+	insertSql := fmt.Sprintf("INSERT INTO %s(mobile,name,password) VALUES('%s','%s','%s')", t.tableName, req.MobileNum, req.Name, req.Password)
+	log.Debug("insertSql:", insertSql)
 
 	return dbExec(t.dbConnectParam, insertSql)
 	// todo
 }
 
+func (t usersTbl) UnRegisterFromDB(req *proto.UnRegRequest) bool {
+	delSql := fmt.Sprintf("DELETE FROM '%s' WHERE mobile='%s'", t.tableName, req.MobileNum)
 
-func (t usersTbl) UnRegisterFromDB(req *proto.UnRegRequest) bool{
-   delSql := fmt.Sprintf("DELETE FROM '%s' WHERE mobile='%s'",  t.tableName, req.MobileNum)
-
-	fmt.Println("insertSql:", delSql)
+	log.Debug("delSql:", delSql)
 
 	return dbExec(t.dbConnectParam, delSql)
+}
+
+func (t usersTbl) CheckUserInfo(request *proto.LoginRequest) (bool, *proto.RegRequest) {
+	sqlQuery := fmt.Sprintf("SELECT mobile,name,password FROM %s where mobile='%s'", t.tableName, request.MobileNum)
+	ret := dbQuery(t.dbConnectParam, sqlQuery)
+
+	regReq := proto.RegRequest{}
+	json.Unmarshal([]byte(ret), &regReq)
+
+	return regReq.MobileNum == request.MobileNum && regReq.Password == request.Password, &regReq
+}
+
+type tokenTbl struct {
+	tableName      string
+	dbConnectParam string
+}
+
+func (t tokenTbl) StoreLoginToken(mobileNum, token string) {
+	// todo
+	insertSql := fmt.Sprintf("INSERT INTO %s(mobile,token) VALUES('%s','%s')", t.tableName, token)
+	log.Debug("insertSql:", insertSql)
+
+	dbExec(t.dbConnectParam, insertSql)
+}
+
+func (t tokenTbl) ExistToken(token string) bool {
+	sqlQuery := fmt.Sprintf("SELECT token FROM %s where token='%s'", t.tableName, token)
+	ret := dbQuery(t.dbConnectParam, sqlQuery)
+
+	if len(ret) > 0 {
+		return true
+	}
+	return false
+}
+
+func (t tokenTbl) DelLoginToken(token string) {
+	delSql := fmt.Sprintf("DELETE FROM '%s' WHERE token='%s'", t.tableName, token)
+
+	log.Debug("insertSql:", delSql)
+
+	dbExec(t.dbConnectParam, delSql)
 }

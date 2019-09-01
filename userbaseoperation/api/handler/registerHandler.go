@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/micro/go-micro/errors"
-	"github.com/wxw1198/vrOffice/userregister/proto"
+	"github.com/wxw1198/vrOffice/userbaseoperation/proto"
 )
 
 var (
@@ -18,7 +18,7 @@ var (
 )
 
 type taskInfo struct {
-	taskList  chan *proto.Request
+	taskList  chan *proto.RegRequest
 	taskFound map[string]struct{} //手机号作为Key
 	resultCh  chan struct{}
 }
@@ -33,20 +33,22 @@ type delTaskInfo struct {
 var ti taskInfo
 
 func Start() {
-	ti = taskInfo{taskList: make(chan *proto.Request, 1024)}
+	ti = taskInfo{taskList: make(chan *proto.RegRequest, 1024)}
 	dti = delTaskInfo{taskList: make(chan *proto.UnRegRequest, 1024)}
+	liti = loginTaskInfo{taskList: make(chan *proto.LoginRequest, 1024)}
+	loti = logoutTaskInfo{taskList:make(chan *proto.LogoutRequest,1024)}
 }
 
-type RegisterHandler struct {
+type UserBaseOperationHandler struct {
 	//db dbRegisterInterface
-	Client proto.RegisterService
+	Client proto.UserBaseOpsService
 }
 
 
 //请求入队列，然后此次请求处于等待状态，直到此请求被处理结束后，才返回
 //注册信息：手机号，邮箱，昵称，密码
 //业务逻辑放到此模块处理
-func (g *RegisterHandler) RegisterUser(ctx context.Context, req *proto.Request, rsp *proto.Response) error {
+func (g *UserBaseOperationHandler) RegisterUser(ctx context.Context, req *proto.RegRequest, rsp *proto.RegResponse) error {
 	log.Print("Received Greeter.Hello API request", req.Name)
 
 	// 0 检查注册参数
