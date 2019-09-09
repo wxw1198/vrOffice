@@ -188,7 +188,7 @@ type tokenTbl struct {
 
 func (t tokenTbl) StoreLoginToken(mobileNum, token string) {
 	// todo
-	insertSql := fmt.Sprintf("INSERT INTO %s(mobile,token) VALUES('%s','%s')", t.tableName, token)
+	insertSql := fmt.Sprintf("INSERT INTO %s(mobile,token) VALUES('%s','%s')", t.tableName, mobileNum, token)
 	log.Debug("insertSql:", insertSql)
 
 	dbExec(t.dbConnectParam, insertSql)

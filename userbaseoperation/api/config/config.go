@@ -12,7 +12,7 @@ type config struct {
 }
 
 var DefaultConfig = config{
-	Etcdv3:    "47.88.230.122:55556",
+	Etcdv3:    "39.100.111.74:55556",
 	MicroName: "go.micro.api.register",
 	ListenLocalAddr:"0.0.0.0:8081",
 	AdvertiseAddr:"39.98.39.224:8081",

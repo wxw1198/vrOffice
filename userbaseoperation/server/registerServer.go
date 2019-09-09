@@ -9,9 +9,9 @@ import (
 
 	"github.com/micro/go-micro/errors"
 	"github.com/wxw1198/vrOffice/db"
+	"github.com/wxw1198/vrOffice/log"
 	"github.com/wxw1198/vrOffice/userbaseoperation/proto"
 	"github.com/wxw1198/vrOffice/utils"
-	"github.com/wxw1198/vrOffice/log"
 )
 
 var (
@@ -25,9 +25,9 @@ type dbRegisterInterface interface {
 	MobileNumExist(string) bool
 	RegisterToDB(*proto.RegRequest) bool
 	UnRegisterFromDB(request *proto.UnRegRequest) bool
-	CheckUserInfo(request *proto.LoginRequest)bool
+	CheckUserInfo(request *proto.LoginRequest) bool
 	StoreLoginToken(mobileNum, token string)
-	ExistToken(token string)bool
+	ExistToken(token string) bool
 	DelLoginToken(token string)
 }
 
@@ -78,7 +78,7 @@ func (r *UserBaseOpsServer) UnRegisterUser(ctx context.Context, req *proto.UnReg
 	// 2 数据入库
 	b := r.db.UnRegisterFromDB(req)
 	if !b {
-		log.Error("req:%v, UnRegisterFromDB fail",req)
+		log.Error("req:%v, UnRegisterFromDB fail", req)
 		rsp.Msg = "data to db err"
 	}
 
@@ -111,8 +111,8 @@ func (r *UserBaseOpsServer) Logout(ctx context.Context, req *proto.LogoutRequest
 }
 
 //检查token是否存在
-func (r *UserBaseOpsServer) CheckToken()bool{
-	
+func (r *UserBaseOpsServer) CheckToken() bool {
+
 	//todo
 	return false
 }

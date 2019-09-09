@@ -9,6 +9,10 @@ import (
 	"github.com/wxw1198/vrOffice/userbaseoperation/proto"
 )
 
+var (
+	cacheTime = time.Hour * 8
+)
+
 type userRegisterRedis struct {
 	// 声明一个全局的redisdb变量
 	redisdb *redis.Client
@@ -17,7 +21,7 @@ type userRegisterRedis struct {
 func NewUserRegister() *userRegisterRedis {
 	u := &userRegisterRedis{
 		redisdb: redis.NewClient(&redis.Options{
-			Addr:     "localhost:6379",
+			Addr:     "39.100.111.74:8081",
 			Password: "", // no password set
 			DB:       0,  // use default DB
 		}),
@@ -49,7 +53,7 @@ func (u *userRegisterRedis) RegisterToDB(req *proto.RegRequest) {
 	val, _ := json.Marshal(req)
 
 	//u.redisdb.Set(req.Name, val, time.Minute*12)
-	u.redisdb.Set(req.MobileNum, val, time.Minute*120)
+	u.redisdb.Set(req.MobileNum, val, cacheTime)
 }
 
 func (u userRegisterRedis) UnRegisterFromDB(req *proto.UnRegRequest) {
@@ -77,7 +81,7 @@ func (u *userRegisterRedis) SyncRegReqData(req *proto.RegRequest) {
 
 func (u *userRegisterRedis) StoreLoginToken(mobileNum, token string) {
 	//u.redisdb.Set(req.Name, val, time.Minute*12)
-	u.redisdb.Set(token, mobileNum, time.Minute*120)
+	u.redisdb.Set(token, mobileNum, cacheTime)
 }
 
 func (u userRegisterRedis) ExistToken(token string) bool {

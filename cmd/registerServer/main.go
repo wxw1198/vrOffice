@@ -6,7 +6,7 @@ import (
 	"github.com/micro/go-plugins/registry/etcdv3"
 	"github.com/wxw1198/vrOffice/userbaseoperation/proto"
 	"github.com/wxw1198/vrOffice/userbaseoperation/server"
-	"github.com/wxw1198/vrOffice/utils"
+	"github.com/wxw1198/vrOffice/log"
 
 	"time"
 )
@@ -20,7 +20,7 @@ func main() {
 
 	reg := etcdv3.NewRegistry(func(op *registry.Options) {
 		op.Addrs = []string{
-			"47.88.230.122:55556",
+			"39.100.111.74:55556",
 		}
 	})
 
@@ -42,6 +42,6 @@ func main() {
 
 	// Run server
 	if err := service.Run(); err != nil {
-		utils.Log.Fatal(err)
+		log.Fatal(err)
 	}
 }

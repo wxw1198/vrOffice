@@ -8,9 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"net/http"
 	"os"
-	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -70,26 +68,6 @@ func PathExist(path string) (bool, error) {
 	return false, err
 }
 
-func DealPanic() {
-	var err error
-	r := recover()
-	if r != nil {
-		switch t := r.(type) {
-		case string:
-			err = errors.New(t)
-		case error:
-			err = t
-		default:
-			err = errors.New("Unknown error")
-		}
-
-		Log.Error("in go process panic: %s", err.Error())
-		fmt.Println("in go process panic:", err.Error())
-
-		Log.Error("%s", debug.Stack())
-	}
-}
-
 // 获得目录路径。若路径为空，错误；若不含/，返回当前路径'.'
 // 例：若path为"/a/b/c/d/index.m3u8////"，dirName为"/a/b/c/d"
 func GetDirName(path string) (dirName string, err error) {
@@ -112,37 +90,10 @@ func GetDirName(path string) (dirName string, err error) {
 	return dirName, nil
 }
 
-// 对外暴露的接口：
-// 将http请求中的包体转换为json格式，但是不清空包体内容，还可以重新使用包体
-func ParseReqBodyToJsonUnclosed(r *http.Request, bodyStruct interface{}, delBody bool) bool {
-
-	if r.ContentLength <= 0 {
-		return false
-	}
-	var bodySlc []byte = make([]byte, 1024)
-	bodyLen, readErr := r.Body.Read(bodySlc)
-	bodySlc = bodySlc[:bodyLen]
-	str := string(bodySlc)
-	Log.Info("str =%s", str)
-
-	if readErr == nil {
-		Log.Info("read body error:", readErr.Error())
-	} else {
-		Log.Info("the body has ", bodyLen, " bytes")
-	}
-	err := json.Unmarshal([]byte(str), bodyStruct)
-	if err == nil {
-		return true
-	} else {
-		return false
-	}
-}
-
 //把检索到数据表的内容转化成为JSON格式
 func RowsToJson(rows *sql.Rows) string {
 	columns, err := rows.Columns()
 	if err != nil {
-		Log.Error("row to json:%s", err)
 		return ""
 	}
 
