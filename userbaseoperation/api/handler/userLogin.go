@@ -1,13 +1,12 @@
 package handler
 
 import (
-	"encoding/json"
 	"context"
+	"encoding/json"
 	"log"
 	"strings"
 
 	"github.com/wxw1198/vrOffice/userbaseoperation/proto"
-
 )
 
 type loginTaskInfo struct {
@@ -17,7 +16,6 @@ type loginTaskInfo struct {
 }
 
 var liti loginTaskInfo
-
 
 //请求入队列，然后此次请求处于等待状态，直到此请求被处理结束后，才返回
 //注册信息：手机号，邮箱，昵称，密码

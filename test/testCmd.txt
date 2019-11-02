@@ -1,7 +1,10 @@
 vrOffice对外暴漏接口测试
 
 1 测试注册
-curl -H 'Content-Type: application/json' -d '{"name": "Asim"}' http://47.75.98.179:8081/register/RegisterUser
+curl -H 'Content-Type: application/json' -d '{"mobileNum":"18019247756","name":"12345678","password":"123456"}' http://127.0.0.1:8080/UserBaseOps/RegisterUser
+
+2 zhuxiaoceshi
+curl -H 'Content-Type: application/json' -d '{"mobileNum":"18019247756","name":"12345678","password":"123456"}' http://127.0.0.1:8080/UserBaseOps/UnRegisterUser
 
 2 测试登陆
 
@@ -10,3 +13,6 @@ curl -H 'Content-Type: application/json' -d '{"name": "Asim"}' http://47.75.98.1
 4 测试用户交互
 
 5 测试工作内容写入及工作日志查询
+
+
+curl -H 'Content-Type: application/json' http://127.0.0.1:8080/register/RegisterUser

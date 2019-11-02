@@ -20,7 +20,6 @@ type dbUnRegisterInterface interface {
 	UnRegisterFromDB(request *proto.UnRegRequest)
 }
 
-
 var dti delTaskInfo
 
 func (g *UserBaseOperationHandler) UnRegisterUser(ctx context.Context, req *proto.UnRegRequest, rsp *proto.UnRegResponse) error {

@@ -92,6 +92,6 @@ func (u userRegisterRedis) ExistToken(token string) bool {
 	}
 }
 
-func (u userRegisterRedis)DelLoginToken(token string){
+func (u userRegisterRedis) DelLoginToken(token string) {
 	u.redisdb.Del(token)
 }

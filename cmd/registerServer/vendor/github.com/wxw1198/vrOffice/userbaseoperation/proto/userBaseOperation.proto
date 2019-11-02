@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package proto;
+
+//package go.micro.api.register;
+
+service UserBaseOps {
+	rpc RegisterUser(RegRequest) returns (RegResponse) {}
+
+	rpc UnRegisterUser(UnRegRequest) returns (UnRegResponse) {}
+
+	rpc Login(LoginRequest) returns (LoginResponse){}
+
+	rpc Logout(LogoutRequest) returns (LogoutResponse){}
+}
+
+message RegRequest {
+	string mobileNum = 1;
+	string name = 2;
+	string password = 3;
+}
+
+message RegResponse {
+	string msg = 1;
+}
+
+message UnRegRequest {
+	string mobileNum = 1;
+	string name = 2;
+	string password = 3;
+}
+
+message UnRegResponse {
+	string msg = 1;
+}
+
+message LoginRequest {
+	string mobileNum = 1;
+	string password = 2;
+}
+
+message LoginResponse {
+	string token = 1;
+}
+
+message LogoutRequest {
+	string token = 1;
+}
+
+message LogoutResponse {
+	string msg = 1;
+}

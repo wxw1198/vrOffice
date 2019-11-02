@@ -2,8 +2,8 @@
 HOSTNAME="127.0.0.1"                                           #数据库信息
 PORT="3306"
 USERNAME="root"
-PASSWORD="test123"
-DBNAME="userDB"                                                #数据库名称
+PASSWORD="123456"
+DBNAME="registerDB"                                                #数据库名称
 TABLENAME="userTbl"                                            #数据库中表的名称
  
 #创建数据库

@@ -14,7 +14,6 @@ var (
 	registerId     = "100" //待修改
 	errRegistering = errors.New(registerId, "the account is registering", 0)
 	errParam       = errors.New(registerId, "register param err", 1)
-
 )
 
 type taskInfo struct {
@@ -36,14 +35,13 @@ func Start() {
 	ti = taskInfo{taskList: make(chan *proto.RegRequest, 1024)}
 	dti = delTaskInfo{taskList: make(chan *proto.UnRegRequest, 1024)}
 	liti = loginTaskInfo{taskList: make(chan *proto.LoginRequest, 1024)}
-	loti = logoutTaskInfo{taskList:make(chan *proto.LogoutRequest,1024)}
+	loti = logoutTaskInfo{taskList: make(chan *proto.LogoutRequest, 1024)}
 }
 
 type UserBaseOperationHandler struct {
 	//db dbRegisterInterface
 	Client proto.UserBaseOpsService
 }
-
 
 //请求入队列，然后此次请求处于等待状态，直到此请求被处理结束后，才返回
 //注册信息：手机号，邮箱，昵称，密码

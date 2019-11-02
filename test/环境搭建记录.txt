@@ -39,7 +39,7 @@ req(用户) --->micro(gw)---->etcdv3 ------>micro(gw) ----->api(注册或者注�
 
 在micro的main.go页加上etcdv3，然后编译安装。
 
- ./micro --registry=etcdv3 --registry_address=47.88.230.122:55556 --api_address=0.0.0.0:8081 api
+ ./micro --registry=etcdv3 --registry_address=127.0.0.1:2379 --api_address=0.0.0.0:8081 api
 
 
 
